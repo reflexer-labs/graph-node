@@ -579,7 +579,7 @@ impl Store {
     /// This uses `with_conn` under the hood. Please see it's documentation for important details
     /// about usage.
     async fn with_entity_conn<T: Send + 'static>(
-        &self,
+        self: Arc<Self>,
         subgraph: &SubgraphDeploymentId,
         f: impl 'static
             + Send
@@ -706,7 +706,7 @@ impl Store {
         let graft_block =
             metadata::deployment_graft(&conn, &subgraph_id)?.map(|(_, ptr)| ptr.number as i32);
 
-        // Generate an API schema for the subgraph and make sure all types in the
+        // Generate an API schema  for the subgraph and make sure all types in the
         // API schema have a @subgraphId directive as well
         let mut schema = input_schema.clone();
         schema.document = api_schema(&schema.document)?;
@@ -862,7 +862,7 @@ impl StoreTrait for Store {
     }
 
     fn supports_proof_of_indexing<'a>(
-        &'a self,
+        self: Arc<Self>,
         subgraph_id: &'a SubgraphDeploymentId,
     ) -> DynTryFuture<'a, bool> {
         self.with_entity_conn(subgraph_id, |conn, cancel| {
@@ -874,7 +874,7 @@ impl StoreTrait for Store {
     }
 
     fn get_proof_of_indexing<'a>(
-        &'a self,
+        self: Arc<Self>,
         subgraph_id: &'a SubgraphDeploymentId,
         indexer: &'a Option<Address>,
         block_hash: H256,
